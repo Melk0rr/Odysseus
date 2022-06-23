@@ -35,6 +35,7 @@ function Invoke-KPIRetreiver {
   BEGIN {
     Write-Host $banner -f Cyan
 
+    $startTime = Get-Date
     # Handle output type : 1. CSV, 2. default
     $defaultOut = $false
     if ($Output) {
@@ -80,9 +81,12 @@ function Invoke-KPIRetreiver {
       if (!$defaultOut) { Write-Host "`nKPIs exported to $Output !" -f Green }
 
     } else { Write-Host "Oh no... It seems no information could be found" -f Red }
+
+    $endTime = Get-Date
   }
 
   END {
+    Write-Host (Get-TimeDiff $startTime $endTime) -f Yellow
     Write-Host $bannerClose -f Cyan
     if ($done) {
       Write-Host "                                  I CAN SEE ITHACA !" -f Cyan
