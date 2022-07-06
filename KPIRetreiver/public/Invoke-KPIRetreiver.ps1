@@ -10,7 +10,7 @@ function Invoke-KPIRetreiver {
     LastUpdated: 2022-Apr-13
 
   .EXAMPLE
-    Invoke-KPIRetreiver -Path "C:\User\RoyBatty\Documents"
+    Invoke-KPIRetreiver -Path "C:\User\r.baty\Documents"
   #>
 
   [CmdletBinding()]
@@ -86,11 +86,13 @@ function Invoke-KPIRetreiver {
   }
 
   END {
-    Write-Host (Get-TimeDiff $startTime $endTime) -f Yellow
+    Write-Host "KPI generation took $(Get-TimeDiff $startTime $endTime)" -f Yellow
+
+    $closingParams = @{ char = " "; length = $bannerClose.length }
     Write-Host $bannerClose -f Cyan
     if ($done) {
-      Write-Host "                                  I CAN SEE ITHACA !" -f Cyan
+      Write-Host (Invoke-PadCenter "I CAN SEE ITHACA !" @closingParams) -f Cyan
       if ($defaultOut) { return $outBuffer }
-    } else { Write-Host "                    Maybe Aeolus will be more lenient next time !" -f Cyan }
+    } else { Write-Host (Invoke-PadCenter "Maybe Aeolus will be more lenient next time !" @closingParams) -f Cyan }
   }
 }
