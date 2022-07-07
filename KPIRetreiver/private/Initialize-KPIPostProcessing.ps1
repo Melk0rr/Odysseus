@@ -32,7 +32,7 @@ function Initialize-KPIPostprocessing {
   )
 
   BEGIN {
-    Write-Host "Initializing post processing for $($kpi.name)" -f Yellow
+    Write-Host "Initializing post processing for $($kpi.name)"
 
     # Progress related variables 
     $i = 0; $mainLeadSize = $base.result.length

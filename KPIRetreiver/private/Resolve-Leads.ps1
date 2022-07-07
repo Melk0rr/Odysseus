@@ -31,7 +31,7 @@ function Resolve-Leads {
   PROCESS {
     # Check if extract is provided
     if ($Extracts) {
-      Write-Host "Extract provided. Checking validity..." -f Yellow
+      Write-Host "Extract provided. Checking validity..."
 
       # Check extract validity by comparing leads used in kpi configuration and leads provided in the extract
       $usedLeads = $kpis.leads.name | select-object -unique
@@ -41,7 +41,7 @@ function Resolve-Leads {
       else { throw "Extract does not match kpi configuration! Check the leads used by each kpi" }
 
     } else {
-      Write-Host "No extract provided" -f Yellow
+      Write-Host "No extract provided"
 
       # Check if all leads have a name
       $hasNames = $adRetreiverLeads.name.length -eq $adRetreiverLeads.length
@@ -57,7 +57,7 @@ function Resolve-Leads {
       if ($adRetreiver) {
         Write-Host "`nLet's see what my friend have found..." -f Cyan
 
-        foreach ($l in $adRetreiver) { Write-Host "$($l.name): $($l.result.length) elements" -f Yellow }
+        foreach ($l in $adRetreiver) { Write-Host "$($l.name): $($l.result.length) elements" }
       } else { throw "Something went with ADRetreiver !" }
     }
   }

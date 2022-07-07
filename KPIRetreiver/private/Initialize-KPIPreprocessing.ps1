@@ -31,7 +31,7 @@ function Initialize-KPIPreprocessing {
     [object[]]  $Leads
   )
 
-  BEGIN { Write-Host "Initializing preprocessing for $($kpi.name)..." -f Yellow }
+  BEGIN { Write-Host "Initializing preprocessing for $($kpi.name)..." }
 
   PROCESS {
     # Execute any preprocessing instruction specified in the configuration file

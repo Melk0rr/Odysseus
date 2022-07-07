@@ -28,7 +28,7 @@ function Format-KPI {
     $kpiName = $kpi.name
     $soupPath = "$publicPath\soup"
 
-    Write-Host "`nProcessing $kpiName data..." -f Yellow
+    Write-Host "`nProcessing $kpiName data..."
   }
 
   PROCESS {
@@ -39,7 +39,7 @@ function Format-KPI {
       $soup
     }
 
-    Write-Host "$kpiName is based on $($leads.length) ADRetreiver leads and $($soups.length) soups" -f Yellow  
+    Write-Host "$kpiName is based on $($leads.length) ADRetreiver leads and $($soups.length) soups"  
 
     # Handle preprocessing
     [array]$leads = Initialize-KPIPreprocessing -KPI $kpi -Leads $leads

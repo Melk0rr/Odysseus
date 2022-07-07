@@ -53,7 +53,7 @@ function Invoke-KPIRetreiver {
     if ($kpis) { Write-Host "KPI Configuration file...OK !" -f Green } else { throw "Invalid configuraiton file !" }
 
     # Exporting params
-    $exportParams = @{ Delimiter = '|'; Encoding = "Unicode" }
+    $exportParams = @{ Delimiter = '|'; Encoding = "utf8BOM" }
   }
 
   PROCESS {
@@ -63,7 +63,7 @@ function Invoke-KPIRetreiver {
 
     if ($adRetreiver) {
       Write-Host "`nThanks to my loyal Argos, I have all the informations required !" -f Cyan
-      Write-Host "Processing $($kpis.length) KPIs..." -f Yellow
+      Write-Host "Processing $($kpis.length) KPIs..."
 
       $kpiIndex = 0; $done = $false
       foreach ($kpi in $kpis) {
@@ -86,9 +86,9 @@ function Invoke-KPIRetreiver {
   }
 
   END {
-    Write-Host "KPI generation took $(Get-TimeDiff $startTime $endTime)" -f Yellow
+    Write-Host "KPI generation took $(Get-TimeDiff $startTime $endTime)"
 
-    $closingParams = @{ char = " "; length = $bannerClose.length }
+    $closingParams = @{ char = " "; length = 85 }
     Write-Host $bannerClose -f Cyan
     if ($done) {
       Write-Host (Invoke-PadCenter "I CAN SEE ITHACA !" @closingParams) -f Cyan
