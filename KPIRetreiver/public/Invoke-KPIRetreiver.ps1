@@ -40,10 +40,11 @@ function Invoke-KPIRetreiver {
     $defaultOut = $false
     if ($Output) {
       if (!(Test-Path $Output -PathType Container)) { throw "$Output is not a valid directory path !" }
-    } else { [array]$outBuffer = @(); $defaultOut = $true }
+    }
+    else { [array]$outBuffer = @(); $defaultOut = $true }
 
     # Format date
-    $day, $time = ((Get-Date -format 'u') -split ' '); $day = $day.Replace('-', '')
+    $day, $time = ((Get-Date -Format "yyyy-MM-dd HH:mm:ss") -split ' '); $day = $day.Replace('-', '')
 
     # Import configuration files
     $publicPath = "$PSScriptRoot"
@@ -80,19 +81,16 @@ function Invoke-KPIRetreiver {
       $done = $true
       if (!$defaultOut) { Write-Host "`nKPIs exported to $Output !" -f Green }
 
-    } else { Write-Host "Oh no... It seems no information could be found" -f Red }
+    }
+    else { Write-Host "Oh no... It seems no information could be found" -f Red }
 
     $endTime = Get-Date
   }
 
   END {
-    Write-Host "KPI generation took $(Get-TimeDiff $startTime $endTime)"
-
     $closingParams = @{ char = " "; length = 85 }
     Write-Host $bannerClose -f Cyan
-    if ($done) {
-      Write-Host (Invoke-PadCenter "I CAN SEE ITHACA !" @closingParams) -f Cyan
-      if ($defaultOut) { return $outBuffer }
-    } else { Write-Host (Invoke-PadCenter "Maybe Aeolus will be more lenient next time !" @closingParams) -f Cyan }
+    Write-Host (Invoke-PadCenter "KPI generation took $(Get-TimeDiff $startTime $endTime)" @closingParams) -f Cyan
+    if ($defaultOut) { return $outBuffer }
   }
 }

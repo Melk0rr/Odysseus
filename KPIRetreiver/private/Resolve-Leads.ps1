@@ -40,7 +40,8 @@ function Resolve-Leads {
       if ($checkLeads) { $adRetreiver = $Extracts } 
       else { throw "Extract does not match kpi configuration! Check the leads used by each kpi" }
 
-    } else {
+    }
+    else {
       Write-Host "No extract provided"
 
       # Check if all leads have a name
@@ -48,7 +49,7 @@ function Resolve-Leads {
       if (!$hasNames) { throw "Each lead must have a name !" }
 
       Write-Host "We have to explore $($adRetreiverLeads.length) leads... I need the help of my faithful companion !" -f Cyan
-      Write-Host "`n<Snif> <Snif>...`n" -f DarkYellow
+      Write-Host "`n<Snif> <Snif>...`n"
 
       # Calling ADRetreiver with the leads specified in configuration
       $adRetreiver = Invoke-ADRetreiver -Leads $adRetreiverLeads -Timeout 1500 -MinBanner
@@ -58,7 +59,8 @@ function Resolve-Leads {
         Write-Host "`nLet's see what my friend have found..." -f Cyan
 
         foreach ($l in $adRetreiver) { Write-Host "$($l.name): $($l.result.length) elements" }
-      } else { throw "Something went with ADRetreiver !" }
+      }
+      else { throw "Something went with ADRetreiver !" }
     }
   }
 
