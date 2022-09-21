@@ -51,7 +51,7 @@ This project is a PowerShell tool that allows to post process data extracted fro
 
 ## Requirements
 
-This script requires Powershell 7.0 and ADRetreiver and ActiveDirectory modules.
+This script requires Powershell 7.0 as well as ADRetreiver and ActiveDirectory modules.
 
 ## Getting Started
 
@@ -68,6 +68,9 @@ Alternatively, you can just import it directly from the project directory with:
 Depending on your environment, dependencies may or may not be auto-imported. In case you end up with an error message, you can just import required modules before importing KPIRetreiver.
 
 ## Usage
+
+You can call Odysseus KPIRetreiver by a simple call:
+`Invoke-KPIRetreiver C:\Path\To\Extract\Directory`
 
 Odysseus is based on a couple of (JSON) configuration files:
 
@@ -168,7 +171,7 @@ Type: Object[]
 Required: False
 ```
 
-  - A **name**  : basically the header
+  - A **name**  : basically the header / title of the new field
   ```yaml
   Type: String
   Required: True
