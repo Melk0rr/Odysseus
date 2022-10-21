@@ -29,10 +29,38 @@ function Invoke-KPIRetreiver {
       ValueFromPipelineByPropertyName = $false
     )]
     [ValidateNotNullOrEmpty()]
-    [array[]]  $Extracts = $null
+    [array[]]  $Extracts = $null,
+
+    [Parameter(
+      Mandatory = $false,
+      ValueFromPipeline = $false,
+      ValueFromPipelineByPropertyName = $false
+    )]
+    [ValidateNotNullOrEmpty()]
+    [switch]  $Help,
+
+    [Parameter(
+      Mandatory = $false,
+      ValueFromPipeline = $false,
+      ValueFromPipelineByPropertyName = $false
+    )]
+    [ValidateNotNullOrEmpty()]
+    [switch]  $Version
   )
 
   BEGIN {
+
+    # If using help or version options, just write and exit
+    if ($Help.IsPresent) {
+      Write-Host $helpInfos
+      continue
+    }
+
+    if ($Version.IsPresent) {
+      Write-Host (Get-ModuleVersion)
+      continue
+    }
+
     Write-Host $banner -f Cyan
 
     $startTime = Get-Date
