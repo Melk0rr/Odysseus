@@ -1,4 +1,4 @@
-$helpInfos = @"
+$docString = @"
 Usage:
   Invoke-KPIRetreiver (-Output) [-Extracts]
   Invoke-KPIRetreiver -Help
