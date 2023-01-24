@@ -64,6 +64,7 @@ function Invoke-KPIRetreiver {
     Write-Host $banner -f Cyan
 
     $startTime = Get-Date
+    
     # Handle output type : 1. CSV, 2. default
     $defaultOut = $false
     if ($Output) {
@@ -77,9 +78,30 @@ function Invoke-KPIRetreiver {
     # Import configuration files
     $publicPath = "$PSScriptRoot"
     $confPath = "$publicPath\conf"
-    [array]$kpis = Import-Json "$confPath\kpis.conf.json"
+    $soupPath = "$publicPath\soup"
 
+    # Sourcing kpis configuration file
+    try {
+      . "$confPath\kpis.conf.ps1"
+    }
+    catch {
+      Write-Error -Message "Failed to import configuration file $($_.FullName): $_"
+    }
+
+    [array]$kpis = $configuration.KPIs
     if ($kpis) { Write-Host "KPI Configuration file...OK !" -f Green } else { throw "Invalid configuraiton file !" }
+
+    # Importing soup files
+    [array]$soups = foreach ($soup in $configuration.Soups) {
+      try {
+        import-csv "$soupPath\$($soup.name).csv" -Delimiter ($soup.delimiter ?? ',')
+      }
+      catch {
+        Write-Error -Message "Failed to import soup $($soup.name)"
+      }
+    }
+
+    if ($soups) { Write-Host "$($soups.count) soups were imported !" -f Green } else { Write-Host "No soup imported !" }
 
     # Exporting params
     $exportParams = @{ Delimiter = '|'; Encoding = "utf8BOM" }

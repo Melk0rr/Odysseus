@@ -37,7 +37,7 @@ function Initialize-KPIPreprocessing {
     # Execute any preprocessing instruction specified in the configuration file
     $preProcLeads = foreach ($lead in $leads) {
       $kpiLead = $kpi.leads.Where({ $_.name -eq $lead.name })
-      if ($kpiLead.preprocess) { $lead.result = invoke-expression $kpiLead.preprocess }
+      if ($kpiLead.preprocess) { $lead.result = invoke-command -scriptblock $kpiLead.preprocess }
       $lead
     }
   }

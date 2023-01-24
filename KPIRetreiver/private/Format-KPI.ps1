@@ -26,26 +26,22 @@ function Format-KPI {
 
   BEGIN {
     $kpiName = $kpi.name
-    $soupPath = "$publicPath\soup"
-
     Write-Host "`nProcessing $kpiName data..."
   }
 
   PROCESS {
     # Get ADRetreiver results relative to the current KPI
     [array]$leads = $adRetreiver.Where({ $kpi.leads.name.Contains($_.name) })
-    [array]$soups = foreach ($soup in $kpi.soups) {
-      $soup | add-member -MemberType NoteProperty -Name 'import' -Value (import-csv "$soupPath\$($soup.name).csv" -Delimiter ($soup.delimiter ?? ','))
-      $soup
-    }
 
-    Write-Host "$kpiName is based on $($leads.length) ADRetreiver leads and $($soups.length) soups"  
+    Write-Host "$kpiName is based on $($leads.length) ADRetreiver leads and $($soups.length) soups"
 
     # Handle preprocessing
     [array]$leads = Initialize-KPIPreprocessing -KPI $kpi -Leads $leads
 
     # Initialize custom kpi variables
-    if ($kpi.kpi_variables.length -gt 0) { invoke-expression ($kpi.kpi_variables -join ';') }
+    if ($kpi.kpivariables.count -gt 0) {
+      $kpi.kpivariables | foreach-object { New-Variable -Name $_ -Value $kpi.kpivariables[$_] }
+    }
 
     # # Post processing : first defined lead is considered as base for final result
     $mainLead = $leads.Where({ $_.name -eq "$($kpi.leads[0].name)" })
