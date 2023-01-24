@@ -24,7 +24,14 @@ function Resolve-Leads {
   )
 
   BEGIN {
-    [array]$adRetreiverLeads = Import-Json "$confPath\leads.conf.json"
+    # Sourcing leads configuration file
+    try {
+      . "$confPath\leads.conf.ps1"
+    }
+    catch {
+      Write-Error -Message "Failed to import configuration file $($_.FullName): $_"
+    }
+
     if ($adRetreiverLeads) { Write-Host "Leads configuration...OK !`n" -f Green } else { throw "Invalid leads configuration !" }
   }
 
@@ -45,10 +52,10 @@ function Resolve-Leads {
       Write-Host "No extract provided"
 
       # Check if all leads have a name
-      $hasNames = $adRetreiverLeads.name.length -eq $adRetreiverLeads.length
+      $hasNames = $adRetreiverLeads.name.count -eq $adRetreiverLeads.count
       if (!$hasNames) { throw "Each lead must have a name !" }
 
-      Write-Host "We have to explore $($adRetreiverLeads.length) leads... I need the help of my faithful companion !" -f Cyan
+      Write-Host "We have to explore $($adRetreiverLeads.count) leads... I need the help of my faithful companion !" -f Cyan
       Write-Host "`n<Snif> <Snif>...`n"
 
       # Calling ADRetreiver with the leads specified in configuration
@@ -58,7 +65,7 @@ function Resolve-Leads {
       if ($adRetreiver) {
         Write-Host "`nLet's see what my friend have found..." -f Cyan
 
-        foreach ($l in $adRetreiver) { Write-Host "$($l.name): $($l.result.length) elements" }
+        foreach ($l in $adRetreiver) { Write-Host "$($l.name): $($l.result.count) elements" }
       }
       else { throw "Something went with ADRetreiver !" }
     }
