@@ -112,7 +112,7 @@ Required: True
 
 3. **Filter** : is basically a Powershell filter that you can use to narrow the results of each lead.
 ```yaml
-Type: String |ScriptBlock
+Type: String | ScriptBlock
 Required: False
 ```
 
