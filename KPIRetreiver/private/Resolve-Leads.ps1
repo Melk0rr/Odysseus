@@ -24,15 +24,22 @@ function Resolve-Leads {
   )
 
   BEGIN {
+
+    $leadConf = Get-Item -Path "$confPath\leads.conf.ps1"
     # Sourcing leads configuration file
     try {
-      . "$confPath\leads.conf.ps1"
+      . $leadConf.FullName
     }
     catch {
       Write-Error -Message "Failed to import configuration file $($_.FullName): $_"
     }
 
-    if ($adRetreiverLeads) { Write-Host "Leads configuration...OK !`n" -f Green } else { throw "Invalid leads configuration !" }
+    if ($adRetreiverLeads) {
+      Write-Host "Leads configuration...OK !`n" -f Green
+    }
+    else {
+      throw "Invalid leads configuration !"
+    }
   }
 
   PROCESS {
@@ -42,18 +49,28 @@ function Resolve-Leads {
 
       # Check extract validity by comparing leads used in kpi configuration and leads provided in the extract
       $usedLeads = $kpis.leads.name | select-object -unique
-      $checkLeads = $true; foreach ($l in $usedLeads) { if ($Extracts.name -notcontains $l) { $checkLeads = $false } }
+      $checkLeads = $true
+      foreach ($l in $usedLeads) {
+        if ($Extracts.name -notcontains $l) {
+          $checkLeads = $false
+        }
+      }
 
-      if ($checkLeads) { $adRetreiver = $Extracts } 
-      else { throw "Extract does not match kpi configuration! Check the leads used by each kpi" }
-
+      if ($checkLeads) {
+        $adRetreiver = $Extracts
+      } 
+      else {
+        throw "Extract does not match kpi configuration! Check the leads used by each kpi"
+      }
     }
     else {
       Write-Host "No extract provided"
 
       # Check if all leads have a name
-      $hasNames = $adRetreiverLeads.name.count -eq $adRetreiverLeads.count
-      if (!$hasNames) { throw "Each lead must have a name !" }
+      [bool]$hasNames = ($adRetreiverLeads.name.count -eq $adRetreiverLeads.count)
+      if (!$hasNames) {
+        throw "Each lead must have a name !"
+      }
 
       Write-Host "We have to explore $($adRetreiverLeads.count) leads... I need the help of my faithful companion !" -f Cyan
       Write-Host "`n<Snif> <Snif>...`n"
@@ -65,9 +82,13 @@ function Resolve-Leads {
       if ($adRetreiver) {
         Write-Host "`nLet's see what my friend have found..." -f Cyan
 
-        foreach ($l in $adRetreiver) { Write-Host "$($l.name): $($l.result.count) elements" }
+        foreach ($l in $adRetreiver) {
+          Write-Host "$($l.name): $($l.result.count) elements"
+        }
       }
-      else { throw "Something went with ADRetreiver !" }
+      else {
+        throw "Something went with ADRetreiver !"
+      }
     }
   }
 

@@ -31,25 +31,27 @@ function Format-KPI {
 
   PROCESS {
     # Get ADRetreiver results relative to the current KPI
-    [array]$leads = $adRetreiver.Where({ $kpi.leads.name.Contains($_.name) })
-
-    Write-Host "$kpiName is based on $($leads.length) ADRetreiver leads and $($soups.length) soups"
-
-    # Handle preprocessing
-    [array]$leads = Initialize-KPIPreprocessing -KPI $kpi -Leads $leads
-
-    # Initialize custom kpi variables
-    if ($kpi.kpivariables.count -gt 0) {
-      $kpi.kpivariables | foreach-object { New-Variable -Name $_ -Value $kpi.kpivariables[$_] }
+    [object[]]$leads = $adRetreiver | foreach-object {
+      if ($kpi.leads.name.Contains($_.Name)) {
+        $_
+      }
     }
 
-    # # Post processing : first defined lead is considered as base for final result
-    $mainLead = $leads.Where({ $_.name -eq "$($kpi.leads[0].name)" })
-    $finalRes = Initialize-KPIPostprocessing -Base $mainLead -KPI $kpi
-    $mainLead | add-member -MemberType NoteProperty -Name 'result' -Value $finalRes -Force
+    Write-Host "$kpiName is based on $($leads.count) ADRetreiver lead(s) and $($soups.count) soup(s)"
 
-    Write-Host "  --------------------------  " -f Cyan
+    # Handle preprocessing
+    $leads = Initialize-KPIPreprocessing -KPI $kpi
+
+    # Initialize custom kpi variables
+    if ($kpi.kpivariables) {
+      Write-Host "Setting up variables for the KPI..."
+      . $kpi.kpivariables
+    }
+
+    # Post processing : first defined lead is considered as base for final result
+    [pscustomobject]$mainLead = $leads.Where({ $_.name -eq "$($kpi.leads[0].name)" })[0]
+    $finalRes = Initialize-KPIPostprocessing -Base $mainLead -KPI $kpi
   }
 
-  END { return $mainLead }
+  END { return $finalRes }
 }
