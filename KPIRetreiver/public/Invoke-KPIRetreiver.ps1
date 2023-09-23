@@ -63,18 +63,15 @@ function Invoke-KPIRetreiver {
 
     Write-Host $banner -f Cyan
 
-    $startTime = Get-Date
-    
+    $startTime = (Get-Date -Format "yyyy-MM-dd HH:mm:ss")
+    $day = ($startTime -split " ")[0].Replace('-', '')
+
     # Handle output type : 1. CSV, 2. default
     $defaultOut = $false
     if ($Output) {
       if (!(Test-Path $Output -PathType Container)) { throw "$Output is not a valid directory path !" }
     }
     else { [array]$outBuffer = @(); $defaultOut = $true }
-
-    # Format date
-    $day, $time = (Get-Date -Format "yyyy-MM-dd HH:mm:ss")
-    $day = ($day -split " ")[0].Replace('-', '')
 
     # Import configuration files
     $confPath = "$PSScriptRoot\conf"
