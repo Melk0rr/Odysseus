@@ -26,34 +26,32 @@ function Format-KPI {
 
   BEGIN {
     $kpiName = $kpi.name
-    $soupPath = "$publicPath\soup"
-
     Write-Host "`nProcessing $kpiName data..."
   }
 
   PROCESS {
     # Get ADRetreiver results relative to the current KPI
-    [array]$leads = $adRetreiver.Where({ $kpi.leads.name.Contains($_.name) })
-    [array]$soups = foreach ($soup in $kpi.soups) {
-      $soup | add-member -MemberType NoteProperty -Name 'import' -Value (import-csv "$soupPath\$($soup.name).csv" -Delimiter ($soup.delimiter ?? ','))
-      $soup
+    [object[]]$leads = $adRetreiver | foreach-object {
+      if ($kpi.leads.name.Contains($_.Name)) {
+        $_
+      }
     }
 
-    Write-Host "$kpiName is based on $($leads.length) ADRetreiver leads and $($soups.length) soups"  
+    Write-Host "$kpiName is based on $($leads.count) ADRetreiver lead(s) and $($soups.count) soup(s)"
 
     # Handle preprocessing
-    [array]$leads = Initialize-KPIPreprocessing -KPI $kpi -Leads $leads
+    $leads = Initialize-KPIPreprocessing -KPI $kpi
 
     # Initialize custom kpi variables
-    if ($kpi.kpi_variables.length -gt 0) { invoke-expression ($kpi.kpi_variables -join ';') }
+    if ($kpi.kpivariables) {
+      Write-Host "Setting up variables for the KPI..."
+      . $kpi.kpivariables
+    }
 
-    # # Post processing : first defined lead is considered as base for final result
-    $mainLead = $leads.Where({ $_.name -eq "$($kpi.leads[0].name)" })
+    # Post processing : first defined lead is considered as base for final result
+    [pscustomobject]$mainLead = $leads.Where({ $_.name -eq "$($kpi.leads[0].name)" })[0]
     $finalRes = Initialize-KPIPostprocessing -Base $mainLead -KPI $kpi
-    $mainLead | add-member -MemberType NoteProperty -Name 'result' -Value $finalRes -Force
-
-    Write-Host "  --------------------------  " -f Cyan
   }
 
-  END { return $mainLead }
+  END { return $finalRes }
 }

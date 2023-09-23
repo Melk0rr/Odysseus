@@ -64,6 +64,7 @@ function Invoke-KPIRetreiver {
     Write-Host $banner -f Cyan
 
     $startTime = Get-Date
+    
     # Handle output type : 1. CSV, 2. default
     $defaultOut = $false
     if ($Output) {
@@ -72,14 +73,38 @@ function Invoke-KPIRetreiver {
     else { [array]$outBuffer = @(); $defaultOut = $true }
 
     # Format date
-    $day, $time = ((Get-Date -Format "yyyy-MM-dd HH:mm:ss") -split ' '); $day = $day.Replace('-', '')
+    $day, $time = (Get-Date -Format "yyyy-MM-dd HH:mm:ss")
+    $day = ($day -split " ")[0].Replace('-', '')
 
     # Import configuration files
-    $publicPath = "$PSScriptRoot"
-    $confPath = "$publicPath\conf"
-    [array]$kpis = Import-Json "$confPath\kpis.conf.json"
+    $confPath = "$PSScriptRoot\conf"
+    $soupPath = "$PSScriptRoot\soup"
+    $confFile = Get-Item -Path "$confPath\kpis.conf.ps1"
 
-    if ($kpis) { Write-Host "KPI Configuration file...OK !" -f Green } else { throw "Invalid configuraiton file !" }
+    # Sourcing kpis configuration file
+    try {
+      . $confFile.FullName
+    }
+    catch {
+      Write-Error -Message "Failed to import configuration file $($_.FullName): $_"
+    }
+
+    [array]$kpis = $configuration.KPIs
+    if ($kpis) { Write-Host "KPI Configuration file...OK !" -f Green } else { throw "Invalid configuration file !" }
+
+    # Importing soup files
+    [array]$soups = foreach ($soup in $configuration.Soups) {
+      try {
+        $import = import-csv "$soupPath\$($soup.name).csv" -Delimiter ($soup.delimiter ?? ',')
+        $soup | add-member -MemberType NoteProperty -Name 'import' -Value $import
+      }
+      catch {
+        Write-Error -Message "Failed to import soup $($soup.name)"
+      }
+      $soup
+    }
+
+    if ($soups) { Write-Host "$($soups.count) soups were imported !" -f Green } else { Write-Host "No soup imported !" }
 
     # Exporting params
     $exportParams = @{ Delimiter = '|'; Encoding = "utf8BOM" }
@@ -94,13 +119,14 @@ function Invoke-KPIRetreiver {
       Write-Host "`nThanks to my loyal Argos, I have all the informations required !" -f Cyan
       Write-Host "Processing $($kpis.length) KPIs..."
 
-      $kpiIndex = 0; $done = $false
+      $kpiIndex = 0
+      $done = $false
       foreach ($kpi in $kpis) {
         # If kpi name is not provided : make one based on index
         $kpi.name = $kpi.name ?? "kpi_$kpiIndex"
         $completedKPI = Format-KPI -KPI $kpi
 
-        if (!$defaultOut) { $completedKPI.result | export-csv "$Output/$($kpi.name)_$day.csv" @exportParams }
+        if (!$defaultOut) { $completedKPI | export-csv "$Output/$($kpi.name)_$day.csv" @exportParams }
         else { $outBuffer += $completedKPI }
 
         $kpiIndex++

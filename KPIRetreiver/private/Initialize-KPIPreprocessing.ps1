@@ -20,24 +20,22 @@ function Initialize-KPIPreprocessing {
       ValueFromPipelineByPropertyName = $false
     )]
     [ValidateNotNullOrEmpty()]
-    [object]  $KPI,
-
-    [Parameter(
-      Mandatory = $true,
-      ValueFromPipeline = $false,
-      ValueFromPipelineByPropertyName = $false
-    )]
-    [ValidateNotNullOrEmpty()]
-    [object[]]  $Leads
+    [object]  $KPI
   )
 
-  BEGIN { Write-Host "Initializing preprocessing for $($kpi.name)..." }
+  BEGIN {
+    Write-Host "`nInitializing pre-processing for $($kpi.name)..."
+  }
 
   PROCESS {
-    # Execute any preprocessing instruction specified in the configuration file
+    # Execute any preprocessing instruction specified in the configuration file if any
     $preProcLeads = foreach ($lead in $leads) {
-      $kpiLead = $kpi.leads.Where({ $_.name -eq $lead.name })
-      if ($kpiLead.preprocess) { $lead.result = invoke-expression $kpiLead.preprocess }
+      [pscustomobject]$kpiLead = $kpi.leads.Where({ $_.name -eq $lead.name })[0]
+
+      if ($kpiLead.preprocess) {
+        $catchedPreprocess = . $kpiLead.preprocess
+      }
+
       $lead
     }
   }

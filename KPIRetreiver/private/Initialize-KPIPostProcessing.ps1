@@ -32,30 +32,28 @@ function Initialize-KPIPostprocessing {
   )
 
   BEGIN {
-    Write-Host "Initializing post processing for $($kpi.name)"
+    Write-Host "Initializing post-processing for $($kpi.name)"
 
     # Progress related variables 
-    $i = 0; $mainLeadSize = $base.result.length
+    $i = 0; $mainLeadSize = $base.result.count
   }
 
   PROCESS {
     # Post processing : creating new fields
     $processed = foreach ($rock in $base.result) {
-
-      # Initialize custom rock variables
-      if ($kpi.rock_variables.length -gt 0) { invoke-expression ($kpi.rock_variables -join ';') }
+      $shapedRock = $null
 
       # Progress
       $percent = [math]::Round($i / $mainLeadSize * 100, 2)
       Write-Progress -Activity "Post processing $($kpi.name) data..." -Status "$percent% completed..." -PercentComplete $percent
 
-      # Creating new fields specified in configuration
-      foreach ($field in $kpi.fields) {
-        $fieldValue = invoke-expression $field.value
-        $rock | add-member -MemberType NoteProperty -Name $field.name -Value $fieldValue
-      }
+      $postProc = . $kpi.postprocess
 
-      $i++; $rock
+      # Creating new fields based on postproc return
+      $shapedRock = Add-Properties $rock $postProc
+
+      $i++
+      $shapedRock
     }
     
     Write-Progress -Activity "Post processing $($kpi.name) data..." -Status "100% completed !" -Completed
