@@ -100,7 +100,7 @@ function Invoke-KPIRetreiver {
     if ($Output) {
       if (!(Test-Path $Output -PathType Container)) { throw "$Output is not a valid directory path !" }
     }
-    else { [array]$outBuffer = @(); $defaultOut = $true }    
+    else { [array]$outBuffer = @(); $defaultOut = $true }
 
     # Import configuration files
     $confPath = "$PSScriptRoot\conf"
