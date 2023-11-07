@@ -20,7 +20,15 @@ function Resolve-Leads {
       ValueFromPipeline = $false,
       ValueFromPipelineByPropertyName = $false
     )]
-    [object[]]  $Extracts
+    [object[]]  $Extracts,
+
+    [Parameter(
+      Mandatory = $false,
+      ValueFromPipeline = $false,
+      ValueFromPipelineByPropertyName = $false
+    )]
+    [ValidateNotNullOrEmpty()]
+    [switch]  $TestMode
   )
 
   BEGIN {
@@ -50,9 +58,12 @@ function Resolve-Leads {
       # Check extract validity by comparing leads used in kpi configuration and leads provided in the extract
       $usedLeads = $kpis.leads.name | select-object -unique
       $checkLeads = $true
-      foreach ($l in $usedLeads) {
-        if ($Extracts.name -notcontains $l) {
-          $checkLeads = $false
+
+      if (!$TestMode.IsPresent) {
+        foreach ($l in $usedLeads) {
+          if ($Extracts.name -notcontains $l) {
+            $checkLeads = $false
+          }
         }
       }
 
@@ -72,11 +83,15 @@ function Resolve-Leads {
         throw "Each lead must have a name !"
       }
 
-      Write-Host "We have to explore $($adRetreiverLeads.count) leads... I need the help of my faithful companion !" -f Cyan
+      Write-Host "We have to explore $($adRetreiverLeads.count) leads in $($Server.count) domains... I need the help of my faithful companion !" -f Cyan
       Write-Host "`n<Snif> <Snif>...`n"
 
       # Calling ADRetreiver with the leads specified in configuration
-      $adRetreiver = Invoke-ADRetreiver -Leads $adRetreiverLeads -Timeout 1500 -MinBanner
+      $credsParams = @{}
+      if ($Credential) {
+        $credsParams.Credential = $Credential
+      }
+      $adRetreiver = Invoke-ADRetreiver -Leads $adRetreiverLeads -Server $Server -MinBanner @credsParams
 
       # Check if there is a result and if so : showing a short report
       if ($adRetreiver) {
@@ -87,7 +102,7 @@ function Resolve-Leads {
         }
       }
       else {
-        throw "Something went with ADRetreiver !"
+        throw "Something went wrong with ADRetreiver !"
       }
     }
   }
