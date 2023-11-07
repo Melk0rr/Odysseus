@@ -15,13 +15,6 @@ function Invoke-KPIRetreiver {
 
   [CmdletBinding()]
   param(
-    [Parameter(
-      Mandatory = $false,
-      ValueFromPipeline = $false,
-      ValueFromPipelineByPropertyName = $false
-    )]
-    [ValidateNotNullOrEmpty()]
-    [string]  $Output,
 
     [Parameter(
       Mandatory = $false,
@@ -45,6 +38,38 @@ function Invoke-KPIRetreiver {
       ValueFromPipelineByPropertyName = $false
     )]
     [ValidateNotNullOrEmpty()]
+    [string]  $Output,
+
+    [Parameter(
+      Mandatory = $false,
+      ValueFromPipeline = $false,
+      ValueFromPipelineByPropertyName = $false
+    )]
+    [ValidateNotNullOrEmpty()]
+    [string[]]  $Server = $env:USERDNSDOMAIN,
+
+    [Parameter(
+      Mandatory = $false,
+      ValueFromPipeline = $false,
+      ValueFromPipelineByPropertyName = $false
+    )]
+    [ValidateNotNull()]
+    [PSCredential]$Credential,
+
+    [Parameter(
+      Mandatory = $false,
+      ValueFromPipeline = $false,
+      ValueFromPipelineByPropertyName = $false
+    )]
+    [ValidateNotNullOrEmpty()]
+    [switch]  $TestMode,
+
+    [Parameter(
+      Mandatory = $false,
+      ValueFromPipeline = $false,
+      ValueFromPipelineByPropertyName = $false
+    )]
+    [ValidateNotNullOrEmpty()]
     [switch]  $Version
   )
 
@@ -59,6 +84,10 @@ function Invoke-KPIRetreiver {
     if ($Version.IsPresent) {
       Write-Host (Get-ModuleVersion)
       continue
+    }
+
+    if (!$Server) {
+      throw "No domain found !"
     }
 
     Write-Host $banner -f Cyan
@@ -104,13 +133,13 @@ function Invoke-KPIRetreiver {
     if ($soups) { Write-Host "$($soups.count) soups were imported !" -f Green } else { Write-Host "No soup imported !" }
 
     # Exporting params
-    $exportParams = @{ Delimiter = '|'; Encoding = "utf8BOM" }
+    $exportParams = @{ Delimiter = '|'; Encoding = "utf8" }
   }
 
   PROCESS {
 
     # Extract ActiveDirectory data via ADRetreiver
-    $adRetreiver = Resolve-Leads -Extracts $Extracts
+    $adRetreiver = Resolve-Leads -Extracts $Extracts -TestMode:($TestMode.IsPresent)
 
     if ($adRetreiver) {
       Write-Host "`nThanks to my loyal Argos, I have all the informations required !" -f Cyan

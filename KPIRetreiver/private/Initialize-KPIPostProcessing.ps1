@@ -40,7 +40,7 @@ function Initialize-KPIPostprocessing {
 
   PROCESS {
     # Post processing : creating new fields
-    $processed = foreach ($rock in $base.result) {
+    $processed = foreach ($rock in $base.result)  {
       $shapedRock = $null
 
       # Progress
